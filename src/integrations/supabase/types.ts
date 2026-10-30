@@ -14,7 +14,121 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      analyses: {
+        Row: {
+          analysis_type: string
+          aspects: Json
+          confidence: number
+          created_at: string
+          id: string
+          original_text: string
+          sentiment: string
+          summary: string | null
+          user_id: string
+        }
+        Insert: {
+          analysis_type: string
+          aspects?: Json
+          confidence: number
+          created_at?: string
+          id?: string
+          original_text: string
+          sentiment: string
+          summary?: string | null
+          user_id?: string
+        }
+        Update: {
+          analysis_type?: string
+          aspects?: Json
+          confidence?: number
+          created_at?: string
+          id?: string
+          original_text?: string
+          sentiment?: string
+          summary?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      analysis_entities: {
+        Row: {
+          analysis_id: string
+          entity_text: string
+          entity_type: string
+          id: string
+        }
+        Insert: {
+          analysis_id: string
+          entity_text: string
+          entity_type: string
+          id?: string
+        }
+        Update: {
+          analysis_id?: string
+          entity_text?: string
+          entity_type?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analysis_entities_analysis_id_fkey"
+            columns: ["analysis_id"]
+            isOneToOne: false
+            referencedRelation: "analyses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      analysis_keywords: {
+        Row: {
+          analysis_id: string
+          id: string
+          keyword: string
+          relevance_score: number
+        }
+        Insert: {
+          analysis_id: string
+          id?: string
+          keyword: string
+          relevance_score?: number
+        }
+        Update: {
+          analysis_id?: string
+          id?: string
+          keyword?: string
+          relevance_score?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analysis_keywords_analysis_id_fkey"
+            columns: ["analysis_id"]
+            isOneToOne: false
+            referencedRelation: "analyses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          nome: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id: string
+          nome?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          nome?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
