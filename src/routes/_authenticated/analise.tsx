@@ -29,7 +29,7 @@ function SingleAnalysis() {
 
   async function run() {
     const t = text.trim();
-    if (!t) return toast.error("Digite um comentário para analisar.");
+    if (!t) return void toast.error("Digite um comentário para analisar.");
     setBusy(true); setError(null); setResult(null);
     try {
       const r = await analyze({ data: { text: t } });
