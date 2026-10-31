@@ -7,7 +7,7 @@ export function buildExecutiveSummary(i: {
 }) {
   if (!i.total) return "Não há comentários analisados no período selecionado.";
   const entries = Object.entries(i.percent) as [string, number][];
-  const [dom, domPct] = entries.sort((a, b) => b[1] - a[1])[0];
+  const [dom, domPct] = entries.sort((a, b) => b[1] - a[1])[0]!;
   const parts = [
     `Foram analisados ${i.total} comentário(s) no período.`,
     `O sentimento predominante foi ${dom} (${domPct}%), com ${i.percent.positivo}% positivos, ${i.percent.negativo}% negativos e ${i.percent.neutro}% neutros.`,
