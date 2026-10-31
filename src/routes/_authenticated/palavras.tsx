@@ -29,8 +29,8 @@ function Words() {
   async function run(useHistory: boolean) {
     setError(null); setRes(null);
     const payload = useHistory ? { texts: (history.data ?? []).map((a) => a.original_text) } : { text: text.trim() };
-    if (useHistory && !payload.texts?.length) return toast.error("Você ainda não tem comentários no histórico.");
-    if (!useHistory && !payload.text) return toast.error("Digite um texto.");
+    if (useHistory && !payload.texts?.length) return void toast.error("Você ainda não tem comentários no histórico.");
+    if (!useHistory && !payload.text) return void toast.error("Digite um texto.");
     setBusy(true);
     try {
       const r = await pre({ data: payload });

@@ -42,9 +42,9 @@ function AuthPage() {
 
   async function submit(e: FormEvent) {
     e.preventDefault();
-    if (!email.includes("@")) return toast.error("Informe um e-mail válido.");
-    if (mode !== "forgot" && password.length < 6) return toast.error("A senha deve ter pelo menos 6 caracteres.");
-    if (mode === "signup" && !nome.trim()) return toast.error("Informe seu nome.");
+    if (!email.includes("@")) return void toast.error("Informe um e-mail válido.");
+    if (mode !== "forgot" && password.length < 6) return void toast.error("A senha deve ter pelo menos 6 caracteres.");
+    if (mode === "signup" && !nome.trim()) return void toast.error("Informe seu nome.");
     setBusy(true);
     try {
       if (mode === "login") {

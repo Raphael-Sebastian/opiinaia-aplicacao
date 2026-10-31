@@ -25,7 +25,7 @@ export const Route = createFileRoute("/_authenticated/lote")({
 const CHUNK = 25; // comentários por requisição à API
 const MAX_ROWS = 1000;
 
-interface Row { text: string; result?: AnalyzeResult; error?: string }
+interface Row { text: string; result?: AnalyzeResult | undefined; error?: string | undefined }
 
 function Batch() {
   const [fileName, setFileName] = useState<string | null>(null);
@@ -41,20 +41,20 @@ function Batch() {
 
   function onFile(f: File | undefined) {
     if (!f) return;
-    if (!f.name.toLowerCase().endsWith(".csv")) return toast.error("Selecione um arquivo .csv");
-    if (f.size > 5 * 1024 * 1024) return toast.error("Arquivo muito grande (máx. 5 MB).");
+    if (!f.name.toLowerCase().endsWith(".csv")) return void toast.error("Selecione um arquivo .csv");
+    if (f.size > 5 * 1024 * 1024) return void toast.error("Arquivo muito grande (máx. 5 MB).");
     Papa.parse<Record<string, string>>(f, {
       header: true,
       skipEmptyLines: true,
       complete: (res) => {
         const cols = res.meta.fields ?? [];
-        if (!cols.length || !res.data.length) return toast.error("O arquivo está vazio ou sem cabeçalho.");
+        if (!cols.length || !res.data.length) return void toast.error("O arquivo está vazio ou sem cabeçalho.");
         if (res.data.length > MAX_ROWS) toast.warning(`Apenas as primeiras ${MAX_ROWS} linhas serão processadas.`);
         setFileName(f.name);
         setRecords(res.data.slice(0, MAX_ROWS));
         setColumns(cols);
         const guess = cols.find((c) => /coment|texto|review|avalia|opini|text|comment/i.test(c)) ?? cols[0];
-        setColumn(guess);
+        setColumn(guess ?? "");
         setRows([]); setFatal(null); setProgress(0);
       },
       error: (err) => toast.error("Erro ao ler o CSV: " + err.message),
@@ -72,15 +72,16 @@ function Batch() {
     try {
       for (let c = 0; c < idx.length; c += CHUNK) {
         const part = idx.slice(c, c + CHUNK);
-        const r = await batch({ data: { texts: part.map((i) => texts[i]) } });
+        const r = await batch({ data: { texts: part.map((i) => texts[i]!) } });
         if (!r.ok) { setFatal(r.message); break; }
         for (const item of r.data.results) {
-          const i = part[item.index];
+          const i = part[item.index]!;
+          const txt = texts[i]!;
           if (item.ok && item.result) {
-            out[i] = { text: texts[i], result: item.result };
-            try { await saveAnalysis(texts[i], item.result, "lote"); }
-            catch { out[i].error = "Analisado, mas não foi salvo no banco"; }
-          } else out[i] = { text: texts[i], error: item.error ?? "Erro no processamento" };
+            out[i] = { text: txt, result: item.result };
+            try { await saveAnalysis(txt, item.result, "lote"); }
+            catch { out[i]!.error = "Analisado, mas não foi salvo no banco"; }
+          } else out[i] = { text: txt, error: item.error ?? "Erro no processamento" };
         }
         setRows([...out]);
         setProgress(Math.round(((c + part.length) / idx.length) * 100));
