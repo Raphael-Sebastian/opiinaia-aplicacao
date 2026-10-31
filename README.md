@@ -1,29 +1,36 @@
-# Welcome to your Lovable project
+# OpinaIA
 
-This project was built with [Lovable](https://lovable.dev).
+**Transformando opiniões em informações inteligentes.** Plataforma acadêmica de análise de opiniões com Processamento de Linguagem Natural.
 
-## Build with Lovable
+## Tecnologias
+- **Frontend:** React 19, TypeScript, TanStack Start, Tailwind CSS v4, Recharts, PapaParse, jsPDF.
+- **Dados:** Lovable Cloud (PostgreSQL, autenticação e Row Level Security).
+- **Motor de NLP:** Python, FastAPI, Hugging Face Transformers, spaCy, NLTK, scikit-learn (pasta `nlp-api/`).
 
-Open your project in the [Lovable editor](https://lovable.dev) and keep building.
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: connect the project to GitHub and every change made in Lovable is committed straight to your repository.
-- **Full ownership**: this code is yours. Push to your repository and your changes sync back into Lovable, ready for your next prompt.
-
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
-
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
+## Estrutura
+```
+src/routes/            páginas (index, auth, reset-password, _authenticated/*)
+src/components/opina/  componentes reutilizáveis (layout, gráficos, resultados)
+src/lib/nlp.functions.ts  camada de serviço → API Python (funções de servidor)
+src/lib/analyses.ts    leitura/gravação no banco
+src/lib/stats.ts       estatísticas do dashboard e relatórios
+nlp-api/               API FastAPI (pré-processamento, sentimento, NER, TF-IDF, resumo, aspectos)
 ```
 
-## Built with
+## Banco de dados
+Tabelas `profiles`, `analyses`, `analysis_entities`, `analysis_keywords`, com chaves estrangeiras em cascata e RLS: cada usuário só vê e altera as próprias análises.
 
-- TanStack Start
-- TypeScript
-- React
-- Tailwind CSS
+## Como conectar a API Python
+1. Hospede `nlp-api/` (veja `nlp-api/README.md`).
+2. Configure o segredo **NLP_API_URL** com a URL pública (ex.: `https://minha-api.onrender.com`).
+3. Opcional: **NLP_API_KEY** igual à configurada na API.
+
+Sem a URL, o app exibe "Serviço de NLP não conectado" e não realiza análises — nenhum resultado é simulado.
+
+## Fluxo do NLP
+1. Pré-processamento (normalização, tokenização, stopwords) — o texto original é preservado para a classificação.
+2. Sentimento com Transformer multilíngue (positivo/negativo/neutro + confiança).
+3. Entidades com spaCy `pt_core_news_sm`.
+4. Termos relevantes por TF-IDF.
+5. Resumo extrativo (frases do próprio texto).
+6. Aspectos por dicionário + sentimento da frase (análise complementar).

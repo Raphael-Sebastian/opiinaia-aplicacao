@@ -2,7 +2,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import {
-  BarChart3, FileText, History, LayoutDashboard, LogOut, Menu, Moon, MessageSquareText, Sun, Type, Upload,
+  FileText, History, LayoutDashboard, LogOut, Menu, Moon, MessageSquareText, Sun, Type, Upload,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
@@ -106,4 +106,3 @@ export function AppShell({ children }: { children: ReactNode }) {
   );
 }
 
-export { BarChart3 };
