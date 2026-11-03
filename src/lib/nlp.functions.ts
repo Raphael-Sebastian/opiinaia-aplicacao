@@ -13,7 +13,7 @@ import type {
 } from "./nlp-types";
 
 async function callNlp<T>(path: string, init?: RequestInit, timeoutMs = 120_000): Promise<NlpResponse<T>> {
-  const base = process.env["NLP_API_URL"];
+  const base = process.env["NLP_API_URL"]?.trim();
   if (!base) {
     return {
       ok: false,
@@ -21,7 +21,12 @@ async function callNlp<T>(path: string, init?: RequestInit, timeoutMs = 120_000)
       message: "O serviço de NLP ainda não foi conectado (variável NLP_API_URL ausente).",
     };
   }
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+    // Necessário para o ngrok gratuito não devolver a página de aviso em HTML.
+    "ngrok-skip-browser-warning": "true",
+  };
   const key = process.env["NLP_API_KEY"];
   if (key) headers["X-API-Key"] = key;
   try {
@@ -30,10 +35,15 @@ async function callNlp<T>(path: string, init?: RequestInit, timeoutMs = 120_000)
       headers,
       signal: AbortSignal.timeout(timeoutMs),
     });
-    const body = await res.json().catch(() => null);
+    const raw = await res.text();
+    let body: unknown = null;
+    try { body = raw ? JSON.parse(raw) : null; } catch { body = null; }
     if (!res.ok) {
       const detail = body && typeof body === "object" && "detail" in body ? String((body as { detail: unknown }).detail) : `HTTP ${res.status}`;
       return { ok: false, reason: res.status === 422 || res.status === 400 ? "invalid" : "unavailable", message: detail };
+    }
+    if (body === null) {
+      return { ok: false, reason: "unavailable", message: "A API de NLP respondeu, mas não em formato JSON. Verifique a URL configurada em NLP_API_URL." };
     }
     return { ok: true, data: body as T };
   } catch (e) {
